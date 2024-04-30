@@ -582,16 +582,12 @@ bool JugadorVeColaborador (ubicacion jugador, ubicacion colaborador) {
 }
 
 bool ColaboradorEnFinal (const nodeN1 &current_node, const ubicacion &final){
-    //cout << "colaborador fila " << current_node.st.colaborador.f << endl;
-    //cout << "colaborador col " << current_node.st.colaborador.c << endl;
     return (current_node.st.colaborador.f == final.f and current_node.st.colaborador.c == final.c);
 }
 
 bool ComprobarFinal (const nodeN1 child, nodeN1 &current_node, const ubicacion &final){
     if (ColaboradorEnFinal(child, final)){
-        //child_clb_walk.secuencia.push_back(act_CLB_STOP);
-        cout << "colaborador fila " << child.st.colaborador.f << endl;
-        cout << "colaborador col " << child.st.colaborador.c << endl;
+        //child.secuencia.push_back(act_CLB_STOP);
         cout << final.f << endl;
         current_node = child;
         return true;
@@ -636,7 +632,7 @@ list<Action> AnchuraColaborador(const stateN0 &inicio, const ubicacion &final, c
                 child_clb_turnSR.st = Apply(act_CLB_TURN_SR, current_node.st, mapa);
                 //if (child_clb_turnSR.st.ultimaOrdenColaborador != act_CLB_TURN_SR) 
                 child_clb_turnSR.secuencia.push_back(act_CLB_TURN_SR);
-                child_clb_walk.st.ultimaOrdenColaborador = act_CLB_TURN_SR;
+                child_clb_turnSR.st.ultimaOrdenColaborador = act_CLB_TURN_SR;
                 
                 if (explored.find(child_clb_turnSR) == explored.end()){ //si el nodo no se ha explorado lo exploro
                     frontier.push_back(child_clb_turnSR);
@@ -644,15 +640,13 @@ list<Action> AnchuraColaborador(const stateN0 &inicio, const ubicacion &final, c
             }
 
             // Generar hijo act_CLB_STOP
-            /*
             if (!SolutionFound){
                 nodeN1 child_clb_stop = current_node;
                 child_clb_stop.secuencia.push_back(act_CLB_STOP);
                 if (explored.find(child_clb_stop) == explored.end()){ //si el nodo no se ha explorado lo exploro
                     frontier.push_back(child_clb_stop);
                 }
-            } 
-            */ 
+            }  
             
         }
 
@@ -662,11 +656,11 @@ list<Action> AnchuraColaborador(const stateN0 &inicio, const ubicacion &final, c
             nodeN1 child_walk = current_node;
             child_walk.st = Apply(actWALK, current_node.st, mapa);
             child_walk.st = Apply(child_walk.st.ultimaOrdenColaborador, child_walk.st, mapa);
+            child_walk.secuencia.push_back(actWALK);
             
             SolutionFound = ComprobarFinal(child_walk, current_node, final);
             
             if (!SolutionFound && explored.find(child_walk) == explored.end()){ //si no lo he explorado lo exploro
-                child_walk.secuencia.push_back(actWALK);
                 frontier.push_back(child_walk);
             }
         }
@@ -676,11 +670,11 @@ list<Action> AnchuraColaborador(const stateN0 &inicio, const ubicacion &final, c
             nodeN1 child_run = current_node;
             child_run.st = Apply(actRUN, current_node.st, mapa);
             child_run.st = Apply(child_run.st.ultimaOrdenColaborador, child_run.st, mapa);
+            child_run.secuencia.push_back(actRUN);
             
             SolutionFound = ComprobarFinal(child_run, current_node, final);
             
-            if (!SolutionFound && explored.find(child_run) == explored.end()){
-                child_run.secuencia.push_back(actRUN);
+            if (!SolutionFound && explored.find(child_run) == explored.end()){  
                 frontier.push_back(child_run);
             }
         }
@@ -690,11 +684,11 @@ list<Action> AnchuraColaborador(const stateN0 &inicio, const ubicacion &final, c
             nodeN1 child_turnL = current_node;
             child_turnL.st = Apply(actTURN_L, current_node.st, mapa);
             child_turnL.st = Apply(child_turnL.st.ultimaOrdenColaborador, child_turnL.st, mapa);
+            child_turnL.secuencia.push_back(actTURN_L);
             
             SolutionFound = ComprobarFinal(child_turnL, current_node, final);
             
             if (!SolutionFound && explored.find(child_turnL) == explored.end()){
-                child_turnL.secuencia.push_back(actTURN_L);
                 frontier.push_back(child_turnL);   
             }
         }
@@ -704,11 +698,11 @@ list<Action> AnchuraColaborador(const stateN0 &inicio, const ubicacion &final, c
             nodeN1 child_turnSR = current_node;
             child_turnSR.st = Apply(actTURN_SR, current_node.st, mapa);
             child_turnSR.st = Apply(child_turnSR.st.ultimaOrdenColaborador, child_turnSR.st, mapa);
+            child_turnSR.secuencia.push_back(actTURN_SR);
 
             SolutionFound = ComprobarFinal(child_turnSR, current_node, final);
             
             if (!SolutionFound && explored.find(child_turnSR) == explored.end()){
-                child_turnSR.secuencia.push_back(actTURN_SR);
                 frontier.push_back(child_turnSR);
             }
         }
@@ -932,13 +926,24 @@ list<Action> UniformeDijkstra (const stateN0 &inicio, const ubicacion &final, co
         child_walk.coste_bateria = child_walk.coste_bateria + CosteN2(actWALK, ini, child_walk.bikini_on, child_walk.zapatillas_on);
         CogerObjeto(child_walk, mapa[child_walk.st.jugador.f][child_walk.st.jugador.c]); //cojo el objeto antes de avanzar a la casilla
 
-        bool esta_en_frontier_walk = FindPriority(child_walk, frontier);        if (esta_en_frontier_walk) cout << "ESTA";
+        //OPCION A
+        /*
+        bool esta_en_frontier_walk = FindPriority(child_walk, frontier);
         if (explored.find(child_walk) == explored.end() && !esta_en_frontier_walk){ //no esta en ninguno
 			frontier.push(child_walk); //insertar en orden: menor coste al frente
         }
         else if (esta_en_frontier_walk){ //está en frontier con mayor coste --> reemplazar  
             priority_queue<nodeN2> frontier_nueva = NuevaFrontier(child_walk, frontier);  
             frontier.swap(frontier_nueva); //swap reemplaza una cola por otra
+        }
+        */
+        
+        //OPCION B
+        if (explored.find(child_walk) == explored.end()){ //si no esta el nodo se añade
+            frontier.push(child_walk); //insertar en orden: menor coste al frente
+        } else { //está en explorados pero con mayor coste
+            set<nodeN2>::iterator it = explored.find(child_walk);
+            //int coste_antiguo = explored(it).coste_bateria;
         }
         
 
