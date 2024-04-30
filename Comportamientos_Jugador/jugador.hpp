@@ -8,7 +8,7 @@
 struct stateN0{
   ubicacion jugador;
   ubicacion colaborador;
-  Action ultimaOrdenColaborador;
+  Action ultimaOrdenColaborador = act_CLB_STOP;
 
   //si la ubicación del jugador y del colaborador es la misma
   bool operator==(const stateN0 &x) const{
